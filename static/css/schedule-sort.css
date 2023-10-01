@@ -1,0 +1,25 @@
+.schedule-table-container {
+    max-height: 500px;
+    overflow-y: scroll;
+    width: 100%;
+}
+
+#table-schedule-sort {
+    position: relative;
+}
+
+#table-schedule-sort thead {
+    position: sticky;
+    top: -1px;
+    box-shadow: 0px 0px 1px 0px rgb(221, 221, 221);
+}
+
+.files-import-container {
+    display: flex !important;
+    flex-direction: row;
+}
+
+.files-import-container .vl {
+    border-left: 1px solid rgb(221, 221, 221);
+    margin: 0px 10px;
+}

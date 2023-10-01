@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Flask + Tkinter</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/component.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/schedule-sort.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/responsive.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'vendor/fontawesome/font-awesome.min.css') }}">
+  <script src="{{ url_for('static', filename = 'jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename = 'vendor/datatables/jquery.dataTables.min.js') }}"></script>
+</head>
+
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <a href="#" title="">
+            <img src="https://media.huce.edu.vn/Media/2_SINHVIEN/FolderFunc/202304/Images/logodhxd-20230421024916-e.png"
+              style="max-height: 40px !important;">
+          </a>
+        </div>
+        <div class="search-bar">
+          <form action="#">
+            <input type="text" id="k" name="k" langid="header-search-placeholder" placeholder="Tìm kiếm..." required="">
+            <button type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
+          </form>
+        </div>
+
+        <div class="menu-btn">
+          <a href="#" title=""><i class="fa fa-bars"></i></a>
+        </div>
+
+        <div class="user-account dropdown">
+          <div class="user-info" data-toggle="dropdown">
+            <img class="user-account-img"
+              src="https://www.refugee-action.org.uk/wp-content/uploads/2016/10/anonymous-user.png"
+              style="width: 30px;height: 30px;border-radius: 50% !important;object-fit: cover;">
+            <a class="user-account-name" href="#" title="">Username (code)</a>
+            <i class="fa fa-caret-down user-account-name-caret-down" aria-hidden="true"></i>
+          </div>
+          <div class="user-account-info dropdown-menu pull-right">
+            <ul class="us-links">
+              <li><a href="#" title="">Thông tin cá nhân</a></li>
+              <li><a title="" onclick="popupDoiMatKhau()">Đổi mật khẩu</a></li>
+              <li><a href="#" title="">Đăng xuất</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="menu-top">
+          <ul>
+            <li>
+
+              <a href="#" title="">
+                <span><i class="fa fa-home" aria-hidden="true"></i></span>
+                Trang chủ
+              </a>
+            </li>
+
+            <li>
+              <a id="spanBell" href="#" title="">
+                <div id="tinTuc" lang="tin-tuc">
+                  <i class="fa fa-bell-o" aria-hidden="true"></i>&nbsp;&nbsp;Tin tức
+                </div>
+              </a>
+            </li>
+            </script>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div class="container">
+      <div class="box-df">
+        <div class="portlet">
+          <div class="portlet-title">
+            <div class="caption">Phân công lịch giảng dạy</div>
+            <div class="actions files-import-container">
+              <div id="file-schedule-sort">
+                <label for="schedule-file">Nhập file lịch giảng dạy:&nbsp;</label>
+                <input type="file" id="schedule-file" accept=".xlsx, .xls" />
+              </div>
+              <div class="vl"></div>
+              <div id="file-alpha-sort">
+                <label for="alpha-file">Nhập file hệ số:&nbsp;(chưa được tích hợp gửi lên để xử lý)</label>
+                <input type="file" id="alpha-file" accept=".xlsx, .xls" />
+              </div>
+            </div>
+          </div>
+          <div class="schedule-table-container table-responsive">
+            <table class="table table-custom table-bordered no-footer dtr-inline" id="table-schedule-sort" role="grid">
+              <thead>
+                <tr role="row">
+                  <th>STT</th>
+                  <th>Mã học phần</th>
+                  <th>Tên môn học</th>
+                  <th>Mã Lớp học phần</th>
+                  <th>Thứ</th>
+                  <th>Tiết</th>
+                  <th>Tuần</th>
+                  <th>Giảng viên</th>
+                  <th>Ghép</th>
+                  <th>Trùng</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <button id="btn-arrange" class="btn btn-action">Xếp giảng viên</button>
+        <button id="btn-check-duplications" class="btn btn-action">Kiểm tra lớp trùng</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+
+      var table = $('#table-schedule-sort').DataTable();
+
+      // Enable global searching on keyup in the search input
+      $('#table-schedule-sort_filter input').keyup(function () {
+        console.log(this.value)
+        table.search(this.value).draw();
+      });
+
+      /*
+        // Cache dữ liệu => không cần
+      */
+      // schedule_data = JSON.parse(localStorage.getItem('schedule_data'))
+      // if (schedule_data != null) {
+      //   const tableBody = document.querySelector('.schedule-table-container #table-schedule-sort tbody')
+      //   tableBody.innerHTML = ''
+      //   schedule_data.forEach((rowData) => {
+      //     const row = document.createElement('tr')
+      //     Object.values(rowData).forEach((value) => {
+      //       const cell = document.createElement('td')
+      //       cell.textContent = value
+      //       row.appendChild(cell)
+      //     })
+      //     tableBody.appendChild(row)
+      //   })
+      // }
+      // arrange_data = JSON.parse(localStorage.getItem('arrange_data'))
+      // if (arrange_data != null) {
+      //   replaceArrayAtIndex(schedule_data, arrange_data, 7)
+      //   const tableBody = document.querySelector('.schedule-table-container #table-schedule-sort tbody')
+      //   tableBody.innerHTML = ''
+      //   schedule_data.forEach((rowData) => {
+      //     const row = document.createElement('tr')
+      //     Object.values(rowData).forEach((value) => {
+      //       const cell = document.createElement('td')
+      //       cell.textContent = value
+      //       row.appendChild(cell)
+      //     })
+      //     tableBody.appendChild(row)
+      //   })
+      // }
+      // check_duplications_data = JSON.parse(localStorage.getItem('check_duplications_data'))
+      // if (check_duplications_data != null) {
+      //   replaceArrayAtIndex(schedule_data, check_duplications_data, 9)
+      //   const tableBody = document.querySelector('.schedule-table-container #table-schedule-sort tbody')
+      //   tableBody.innerHTML = ''
+      //   schedule_data.forEach((rowData) => {
+      //     const row = document.createElement('tr')
+      //     Object.values(rowData).forEach((value) => {
+      //       const cell = document.createElement('td')
+      //       cell.textContent = value
+      //       row.appendChild(cell)
+      //     })
+      //     tableBody.appendChild(row)
+      //   })
+      // }
+
+      let schedule_data = null;
+
+      $('#schedule-file').on('change', function (e) {
+        var file = e.target.files[0]
+        const formData = new FormData()
+        formData.append('file', file)
+
+        fetch('/upload', {
+          method: 'POST',
+          body: formData
+        })
+          .then((response) => response.text())
+          .then((data) => {
+            console.log(JSON.parse(data))
+            localStorage.setItem('schedule_data', data)
+            const tableBody = document.querySelector('.schedule-table-container #table-schedule-sort tbody')
+            tableBody.innerHTML = ''
+            JSON.parse(data).forEach((rowData) => {
+              const row = document.createElement('tr')
+              Object.values(rowData).forEach((value) => {
+                const cell = document.createElement('td')
+                cell.textContent = value
+                row.appendChild(cell)
+              })
+              tableBody.appendChild(row)
+            })
+            table = $('#table-schedule-sort').DataTable();
+          })
+          .catch((error) => {
+            console.error('Error uploading file:', error)
+          })
+      })
+
+      // Tích hợp sau
+      // $('#alpha-file').on('change', function (e) {
+      //   var file = e.target.files[0]
+      //   const formData = new FormData()
+      //   formData.append('file', file)
+
+      //   fetch('/upload', {
+      //     method: 'POST',
+      //     body: formData
+      //   })
+      //     .then((response) => response.text())
+      //     .then((data) => {
+      //       })
+      //     .catch((error) => {
+      //       console.error('Error uploading file:', error)
+      //     })
+      // })
+
+      $('#btn-arrange').click(function () {
+        fetch('/arrange')
+          .then((response) => response.text())
+          .then((data) => {
+            console.log(JSON.parse(data))
+            localStorage.setItem('arrange_data', data)
+            schedule_data = schedule_data ?? JSON.parse(localStorage.getItem('schedule_data'))
+            replaceArrayAtIndex(schedule_data, JSON.parse(data), 7)
+            const tableBody = document.querySelector('.schedule-table-container #table-schedule-sort tbody')
+            tableBody.innerHTML = ''
+            schedule_data.forEach((rowData) => {
+              const row = document.createElement('tr')
+              Object.values(rowData).forEach((value) => {
+                const cell = document.createElement('td')
+                cell.textContent = value
+                row.appendChild(cell)
+              })
+              tableBody.appendChild(row)
+            })
+            table = $('#table-schedule-sort').DataTable();
+          })
+          .catch((error) => {
+            console.error('Error arrange schedule:', error)
+          })
+      })
+
+      $('#btn-check-duplications').click(function () {
+        fetch('/check-duplications')
+          .then((response) => response.text())
+          .then((data) => {
+            console.log(JSON.parse(data))
+            localStorage.setItem('check_duplications_data', data)
+            schedule_data = schedule_data ?? JSON.parse(localStorage.getItem('schedule_data'))
+            replaceArrayAtIndex(schedule_data, JSON.parse(data), 9)
+            const tableBody = document.querySelector('.schedule-table-container #table-schedule-sort tbody')
+            tableBody.innerHTML = ''
+            schedule_data.forEach((rowData) => {
+              const row = document.createElement('tr')
+              Object.values(rowData).forEach((value) => {
+                const cell = document.createElement('td')
+                cell.textContent = value
+                row.appendChild(cell)
+              })
+              tableBody.appendChild(row)
+            })
+            table = $('#table-schedule-sort').DataTable();
+          })
+          .catch((error) => {
+            console.error('Error arrange schedule:', error)
+          })
+      })
+    })
+
+    function replaceArrayAtIndex(mainArray, secondArray, index) {
+      if (index < 0 || index >= secondArray.length) {
+        console.error('Invalid index');
+        return;
+      }
+
+      for (let i = 0; i < mainArray.length; i++) {
+        if (Array.isArray(mainArray[i])) {
+          mainArray[i][index] = secondArray[i];
+        } else {
+          console.error('Element at index ' + i + ' is not an array');
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
