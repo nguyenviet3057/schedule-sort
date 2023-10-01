@@ -136,14 +136,6 @@
   <script>
     $(document).ready(function () {
 
-      var table = $('#table-schedule-sort').DataTable();
-
-      // Enable global searching on keyup in the search input
-      $('#table-schedule-sort_filter input').keyup(function () {
-        console.log(this.value)
-        table.search(this.value).draw();
-      });
-
       /*
         // Cache dữ liệu => không cần
       */
@@ -218,7 +210,6 @@
               })
               tableBody.appendChild(row)
             })
-            table = $('#table-schedule-sort').DataTable();
           })
           .catch((error) => {
             console.error('Error uploading file:', error)
@@ -262,7 +253,6 @@
               })
               tableBody.appendChild(row)
             })
-            table = $('#table-schedule-sort').DataTable();
           })
           .catch((error) => {
             console.error('Error arrange schedule:', error)
@@ -288,7 +278,6 @@
               })
               tableBody.appendChild(row)
             })
-            table = $('#table-schedule-sort').DataTable();
           })
           .catch((error) => {
             console.error('Error arrange schedule:', error)
